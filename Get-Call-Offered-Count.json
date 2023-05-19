@@ -1,0 +1,52 @@
+{
+  "name": "Get Call Offered Count",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/analytics/conversations/aggregates/query",
+      "requestType": "POST",
+      "headers": {},
+      "requestTemplate": "{\n  \"interval\": \"${input.Interval}\",\n  \n  \"groupBy\": [\n    \"queueId\"\n  ],\n  \"metrics\": [\n    \"nOffered\"\n  ],\n  \"filter\": {\n    \"type\": \"and\",\n    \"predicates\": [\n      {\n        \"dimension\": \"queueId\",\n        \"value\": \"${input.QueueID}\"\n      },\n      {\n        \"dimension\": \"mediaType\",\n        \"value\": \"voice\"\n      }\n    ]\n  }\n}"
+    },
+    "response": {
+      "translationMap": {
+        "count": "$.results[?(@.group.mediaType=='voice')].data[0].metrics[?(@.metric=='nOffered')].stats.count"
+      },
+      "translationMapDefaults": {
+        "count": "[0].[0]"
+      },
+      "successTemplate": "{\r\n\"count\": ${successTemplateUtils.firstFromArray(\"${count}\")}\r\n}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "QueueID": {
+            "type": "string"
+          },
+          "Interval": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
